@@ -4,7 +4,7 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 from benchmark_runtime.backend import format_exception
-from benchmark_runtime.protocols import GradingClientLike
+from benchmark_runtime.protocols import EvaluationClientLike, ScoringClientLike
 from benchmark_runtime.schemas import (
     EvalResult,
     EvalResultData,
@@ -17,7 +17,7 @@ from benchmark_runtime.schemas import (
 
 async def evaluate_generation(
     *,
-    client: GradingClientLike,
+    client: EvaluationClientLike,
     generation: GenerationResult | None,
     task_id: str,
     dataset: str | None,
@@ -52,7 +52,7 @@ async def evaluate_generation(
 
 async def score_evaluations(
     *,
-    client: GradingClientLike,
+    client: ScoringClientLike,
     evaluations: Mapping[str, EvalResult | None],
     task_ids: Sequence[str],
     dataset: str | None,

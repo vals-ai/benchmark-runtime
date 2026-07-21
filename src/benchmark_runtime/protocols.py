@@ -27,9 +27,16 @@ class SandboxProviderLike(Protocol):
     async def delete_sandbox(self, instance_id: str) -> None: ...
 
 
-class GradingClientLike(Protocol):
+class EvaluationClientLike(Protocol):
     async def evaluate_response(self, task_id: str, response: str, dataset: str | None = None) -> Any: ...
+
+
+class ScoringClientLike(Protocol):
     async def final_score(self, evaluation_results: dict[str, Any], dataset: str | None = None) -> Any: ...
+
+
+class GradingClientLike(EvaluationClientLike, ScoringClientLike, Protocol):
+    pass
 
 
 class BenchmarkServiceClientLike(GradingClientLike, Protocol):
@@ -50,8 +57,10 @@ class BenchmarkServiceClientLike(GradingClientLike, Protocol):
 
 __all__ = [
     "BenchmarkServiceClientLike",
+    "EvaluationClientLike",
     "ExecResultLike",
     "GradingClientLike",
     "SandboxLike",
     "SandboxProviderLike",
+    "ScoringClientLike",
 ]

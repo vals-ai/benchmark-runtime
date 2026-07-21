@@ -7,7 +7,13 @@ from benchmark_runtime.client import auth_headers, build_client
 from benchmark_runtime.contract import AgentContract, format_run_cmd
 from benchmark_runtime.grading import evaluate_generation, score_evaluations
 from benchmark_runtime.manifest import AgentSpec, BundleSpec, Manifest, TaskEntry
-from benchmark_runtime.protocols import ExecResultLike, GradingClientLike, SandboxLike
+from benchmark_runtime.protocols import (
+    EvaluationClientLike,
+    ExecResultLike,
+    GradingClientLike,
+    SandboxLike,
+    ScoringClientLike,
+)
 from benchmark_runtime.sandbox_env import preflight_model, resolve_sandbox_env
 from benchmark_runtime.schemas import (
     EvalResult,
@@ -30,6 +36,7 @@ __all__ = [
     "EvalResultData",
     "EvalStatus",
     "EvaluateResponseRequest",
+    "EvaluationClientLike",
     "ExecResultLike",
     "FinalScoreResponse",
     "GenerationResult",
@@ -40,6 +47,7 @@ __all__ = [
     "SandboxGenerationBackend",
     "SandboxLike",
     "ScoreResult",
+    "ScoringClientLike",
     "Task",
     "TaskEntry",
     "auth_headers",
