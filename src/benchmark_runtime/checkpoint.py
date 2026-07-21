@@ -1,0 +1,57 @@
+"""Run-config bootstrap and resume detection."""
+
+from typing import Any
+
+from benchmark_runtime.artifacts import RunArtifacts
+from benchmark_runtime.schemas import EvalStatus, GenerationStatus
+
+
+def load_or_create_run_config(
+    *,
+    artifacts: RunArtifacts,
+    model: str,
+    task_ids: list[str],
+    dataset_file: str | None,
+    dataset_name: str | None,
+    task_source: str,
+    payload_schema: str,
+    payload_type: str,
+    runner_version: str,
+    generation_version: str,
+) -> tuple[dict[str, Any], bool]:
+    """Load an existing run_config.json or stamp a new one."""
+    existing = artifacts.load_run_config()
+    if existing is not None:
+        return existing, True
+
+    config: dict[str, Any] = {
+        "run_id": artifacts._run_id,
+        "model": model,
+        "tasks": task_ids,
+        "dataset_file": dataset_file,
+        "dataset_name": dataset_name,
+        "task_source": task_source,
+        "payload_schema": payload_schema,
+        "payload_type": payload_type,
+        "runner_version": runner_version,
+        "generation_version": generation_version,
+    }
+    artifacts.save_run_config(config)
+    return config, False
+
+
+def is_generation_redoable(artifacts: RunArtifacts, task_id: str) -> bool:
+    gen = artifacts.load_generation(task_id)
+    if gen is None:
+        return True
+    return gen.status == GenerationStatus.ERROR
+
+
+def is_eval_redoable(artifacts: RunArtifacts, task_id: str) -> bool:
+    ev = artifacts.load_eval(task_id)
+    if ev is None:
+        return True
+    return ev.status in (EvalStatus.ERROR, EvalStatus.GENERATION_ERROR)
+
+
+__all__ = ["is_eval_redoable", "is_generation_redoable", "load_or_create_run_config"]
