@@ -7,17 +7,17 @@ from benchmark_runtime.contract import AgentContract, format_run_cmd
 def test_loads_fields_and_validates_problem_placeholder(tmp_path: Path):
     p = tmp_path / "contract.yaml"
     p.write_text(
-        "name: legal_research_agent\n"
+        "name: example_agent\n"
         "install_cmd: bash setup.sh\n"
         "run_cmd: >-\n"
-        "  legal-research-runner run --model {model} --run-id valkyrie --skip-eval\n"
+        "  example-agent run --model {model} --run-id test-run --skip-eval\n"
         "  --results-dir /app/results --problem {problem_statement_path} {task_id}\n"
-        "final_output: /app/results/valkyrie\n"
+        "final_output: /app/results/test-run\n"
     )
     c = AgentContract.from_yaml(p)
-    assert c.name == "legal_research_agent"
+    assert c.name == "example_agent"
     assert c.install_cmd == "bash setup.sh"
-    assert c.final_output == "/app/results/valkyrie"
+    assert c.final_output == "/app/results/test-run"
     assert "{problem_statement_path}" in c.run_cmd
 
 
@@ -31,14 +31,14 @@ def test_run_cmd_must_contain_problem_placeholder(tmp_path: Path):
 def test_format_run_cmd_fills_model_leaves_runtime_placeholders():
     out = format_run_cmd(
         "a --model {model} --problem {problem_statement_path} {task_id}",
-        {"model": "openai/gpt-5"},
+        {"model": "provider/example-model"},
     )
-    assert out == "a --model openai/gpt-5 --problem {problem_statement_path} {task_id}"
+    assert out == "a --model provider/example-model --problem {problem_statement_path} {task_id}"
 
 
 def _contract(**kw: Any) -> AgentContract:
     base: dict[str, Any] = dict(
-        name="snap",
+        name="example",
         run_cmd="run --model {model} {problem_statement_path}",
         final_output="/app/results",
     )
@@ -46,20 +46,18 @@ def _contract(**kw: Any) -> AgentContract:
     return AgentContract(**base)
 
 
-def test_param_defaults_snap_shape():
-    # SNAP: defaults has model (required, no default) + auditor_model (with default).
-    # param_defaults must exclude model and return only auditor_model.
+def test_param_defaults_from_defaults():
+    # Required runtime parameters are excluded; optional defaults are returned.
     c = _contract(
         defaults={
             "model": {"type": "str", "required": True},
-            "auditor_model": {"type": "str", "required": False, "default": "openai/gpt-5-2025-08-07"},
+            "auditor_model": {"type": "str", "required": False, "default": "provider/example-auditor"},
         }
     )
-    assert c.param_defaults() == {"auditor_model": "openai/gpt-5-2025-08-07"}
+    assert c.param_defaults() == {"auditor_model": "provider/example-auditor"}
 
 
-def test_param_defaults_factory_shape():
-    # factory: defaults has model (required, no default); kwargs has max_output_tokens + reasoning_effort.
+def test_param_defaults_from_kwargs():
     c = _contract(
         defaults={"model": {"type": "str", "required": True}},
         kwargs={
@@ -71,8 +69,7 @@ def test_param_defaults_factory_shape():
 
 
 def test_param_defaults_model_override_protection():
-    # claude_code_vcb: defaults has model with default: "". param_defaults() returns {}.
-    # format_run_cmd with model="anthropic/x" must preserve the runtime model, not blank it.
+    # An empty model default cannot override the runtime-selected model.
     c = _contract(defaults={"model": {"required": False, "default": ""}})
     assert c.param_defaults() == {}
     out = format_run_cmd(

@@ -14,11 +14,11 @@ def test_task_allows_base_extra_and_typed_subclass_fields():
     assert t.timeout is None
     assert t.model_dump()["system_prompt"] == "be helpful"
 
-    class SWEBenchTask(Task):
+    class ExtendedTask(Task):
         docker_image: str
         cwd: str
 
-    t = SWEBenchTask(id="01", question="fix bug", docker_image="acme/repo:tag", cwd="/repo")
+    t = ExtendedTask(id="01", question="fix bug", docker_image="acme/repo:tag", cwd="/repo")
     assert t.docker_image == "acme/repo:tag"
     assert t.cwd == "/repo"
 
@@ -71,15 +71,15 @@ def test_eval_result_data_allows_extra_and_typed_subclass_fields():
 
 
 def test_backfills_weighted_from_sdk_key_and_preserves_extra():
-    # SNAP / vals-SDK TestResult shape: weighted score under pass_percentage_with_weight
+    # Older evaluation payloads store the weighted score under pass_percentage_with_weight.
     d = EvalResultData.model_validate({"pass_percentage": 57.1, "pass_percentage_with_weight": 42.857})
-    assert d.weighted_pass_percentage == 42.857           # backfilled for vals-harbor _reward
+    assert d.weighted_pass_percentage == 42.857
     dumped = d.model_dump(mode="json")
     assert dumped["pass_percentage_with_weight"] == 42.857
 
 
 def test_native_weighted_name_is_unchanged():
-    # LR shape already uses weighted_pass_percentage
+    # Native payloads already use weighted_pass_percentage.
     d = EvalResultData.model_validate({"pass_percentage": 50.0, "weighted_pass_percentage": 55.0})
     assert d.weighted_pass_percentage == 55.0
 
