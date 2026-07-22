@@ -5,7 +5,7 @@ description = "Shared manifest, agent, artifact, and grading contracts for Vals 
 requires-python = ">=3.12"
 readme = "README.md"
 dependencies = [
-    "create-benchmark-service @ git+https://github.com/vals-ai/create-benchmark-service.git@16cd59046d8d5f01e99206841fe3c6d2e7167355",
+    "create-benchmark-service @ git+https://github.com/vals-ai/create-benchmark-service.git@e537e6e9f3648329697341e407d40e554f5f33e5",
     "pydantic>=2.0",
     "pyyaml>=6.0",
 ]

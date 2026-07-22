@@ -222,7 +222,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "create-benchmark-service", git = "https://github.com/vals-ai/create-benchmark-service.git?rev=16cd59046d8d5f01e99206841fe3c6d2e7167355" },
+    { name = "create-benchmark-service", git = "https://github.com/vals-ai/create-benchmark-service.git?rev=e537e6e9f3648329697341e407d40e554f5f33e5" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pyyaml", specifier = ">=6.0" },
 ]
@@ -499,8 +499,8 @@ wheels = [
 
 [[package]]
 name = "create-benchmark-service"
-version = "0.17.1.dev1+g16cd59046"
-source = { git = "https://github.com/vals-ai/create-benchmark-service.git?rev=16cd59046d8d5f01e99206841fe3c6d2e7167355#16cd59046d8d5f01e99206841fe3c6d2e7167355" }
+version = "0.17.2"
+source = { git = "https://github.com/vals-ai/create-benchmark-service.git?rev=e537e6e9f3648329697341e407d40e554f5f33e5#e537e6e9f3648329697341e407d40e554f5f33e5" }
 dependencies = [
     { name = "boto3" },
     { name = "cachetools" },
