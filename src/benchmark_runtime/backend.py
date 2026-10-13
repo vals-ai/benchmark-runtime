@@ -117,7 +117,7 @@ class SandboxGenerationBackend:
             if contract.install_cmd:
                 install_result = await sandbox.exec(
                     f"cd {shlex.quote(install_cwd)}"
-                    f" && timeout -k 10 {INSTALL_TIMEOUT_SEC} {contract.install_cmd}"
+                    f" && timeout -k 10 {INSTALL_TIMEOUT_SEC} env {contract.install_cmd}"
                 )
                 if install_result.exit_code != 0:
                     return _error_result(
@@ -136,7 +136,7 @@ class SandboxGenerationBackend:
                 .replace("{task_id}", shlex.quote(task_id))
             )
             if agent_timeout:
-                run_cmd = f"timeout -k 10 {int(agent_timeout)} {run_cmd}"
+                run_cmd = f"timeout -k 10 {int(agent_timeout)} env {run_cmd}"
             result = await sandbox.exec(
                 f"cd {shlex.quote(cwd)} && PYTHONSAFEPATH=1 {run_cmd}",
             )
