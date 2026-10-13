@@ -94,6 +94,28 @@ def _make_bundle() -> AgentBundle:
     return AgentBundle(root="my_agent", zip_bytes=buf.getvalue())
 
 
+async def test_env_prefixed_run_cmd_survives_the_timeout_wrapper(tmp_path: Path) -> None:
+    """`timeout` execs its argument directly, so without `env` a run_cmd starting with
+    VAR=value is taken as the program name and exits 127 before the agent starts."""
+    sandbox = FakeSandbox(download_bytes=_make_generation_json("task-1"))
+    contract = _make_contract(with_install=False).model_copy(
+        update={"run_cmd": "NO_MODEL_GATEWAY=True agent run --problem {problem_statement_path} --task {task_id}"}
+    )
+
+    await SandboxGenerationBackend().generate(
+        sandbox=sandbox,
+        contract=contract,
+        task_id="task-1",
+        model="provider/example-model",
+        problem_path="/problems/task-1.json",
+        cwd="/app",
+        agent_timeout=86400.0,
+        log_dir=tmp_path,
+    )
+
+    assert "timeout -k 10 86400 env NO_MODEL_GATEWAY=True agent run" in sandbox.commands[-1]
+
+
 async def test_success_path(tmp_path: Path) -> None:
     """Install and run are executed; run command has substitutions; returns parsed result."""
     raw = _make_generation_json("task-1")
@@ -128,7 +150,7 @@ async def test_success_path(tmp_path: Path) -> None:
     assert "{problem_statement_path}" not in run_cmd
     assert "{task_id}" not in run_cmd
     # timeout -k prefix present (SIGKILL 10s after SIGTERM)
-    assert "timeout -k 10 60" in run_cmd
+    assert "timeout -k 10 60 env " in run_cmd
     # PYTHONSAFEPATH set
     assert "PYTHONSAFEPATH=1" in run_cmd
 
